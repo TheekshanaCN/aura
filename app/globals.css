@@ -1,0 +1,376 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+/* ================================================
+   🌙 MIDNIGHT GLASS (Default - macOS Inspired)
+   Premium glassmorphism with sophisticated colors
+   ================================================ */
+:root,
+[data-theme="night"] {
+  --radius: 0.75rem;
+
+  /* Shadcn required vars */
+  --background: #0f1419;
+  --foreground: #f5f5f7;
+  --card: #16181d;
+  --card-foreground: #f5f5f7;
+  --popover: #16181d;
+  --popover-foreground: #f5f5f7;
+  --primary: #0a84ff;
+  --primary-foreground: #ffffff;
+  --secondary: #1d1f26;
+  --secondary-foreground: #f5f5f7;
+  --muted: #555;
+  --muted-foreground: #a1a1a6;
+  --accent: #1d1f26;
+  --accent-foreground: #f5f5f7;
+  --destructive: #ff3b30;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.06);
+  --ring: #0a84ff;
+  --chart-1: #0a84ff;
+  --chart-2: #30b0c0;
+  --chart-3: #34c759;
+  --chart-4: #ff9500;
+  --chart-5: #ff3b30;
+  --sidebar: #0f1419;
+  --sidebar-foreground: #f5f5f7;
+  --sidebar-primary: #0a84ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1d1f26;
+  --sidebar-accent-foreground: #f5f5f7;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #0a84ff;
+
+  /* ── Premium macOS Glass Tokens ── */
+  --app-bg:            #0f1419;
+  --app-bg-gradient:   linear-gradient(135deg, #0f1419 0%, #1a1d24 100%);
+  --surface:           rgba(30, 30, 35, 0.4);
+  --surface-glass:     rgba(30, 30, 35, 0.35);
+  --surface-hover:     rgba(45, 45, 50, 0.5);
+  --surface-card:      rgba(30, 30, 35, 0.38);
+  --border-c:          rgba(255, 255, 255, 0.06);
+  --border-glass:      rgba(255, 255, 255, 0.1);
+  --text-primary:      #f5f5f7;
+  --text-secondary:    #a1a1a6;
+  --text-muted:        #86868b;
+  --accent-color:      #0a84ff;
+  --accent-hover:      #0071e3;
+  --accent-text:       #ffffff;
+  --accent-glow:       rgba(10, 132, 255, 0.25);
+  --accent-secondary:  #30b0c0;
+  --sidebar-bg-c:      rgba(15, 20, 25, 0.85);
+  --logo-bg:           rgba(10, 132, 255, 0.15);
+  --logo-text:         #f5f5f7;
+  --search-bg:         rgba(30, 30, 35, 0.35);
+  --search-border:     rgba(255, 255, 255, 0.06);
+  --search-focus:      #0a84ff;
+  --shortcut-bg:       rgba(30, 30, 35, 0.35);
+  --shortcut-hover-bg: rgba(45, 45, 50, 0.45);
+  --shortcut-hover-border: #0a84ff;
+  --tag-bg:            rgba(10, 132, 255, 0.12);
+  --tag-text:          #70c1e8;
+  --upgrade-bg:        rgba(10, 132, 255, 0.08);
+  --upgrade-text:      #70c1e8;
+  --upgrade-border:    rgba(10, 132, 255, 0.15);
+  --upgrade-btn-bg:    rgba(10, 132, 255, 0.12);
+  --btn-icon-bg:       rgba(30, 30, 35, 0.35);
+  --btn-icon-hover:    rgba(45, 45, 50, 0.45);
+  --glass-effect:      blur(20px);
+}
+
+/* ================================================
+   🌅 BRIGHT MORNING (macOS Light Inspired)
+   Light glass with subtle blue accents
+   ================================================ */
+[data-theme="morning"] {
+  --radius: 0.75rem;
+
+  /* Shadcn required vars */
+  --background: #fbfbfd;
+  --foreground: #1d1d1f;
+  --card: #ffffff;
+  --card-foreground: #1d1d1f;
+  --popover: #ffffff;
+  --popover-foreground: #1d1d1f;
+  --primary: #0071e3;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f5f7;
+  --secondary-foreground: #1d1d1f;
+  --muted: #e5e5e7;
+  --muted-foreground: #86868b;
+  --accent: #f5f5f7;
+  --accent-foreground: #1d1d1f;
+  --destructive: #ff3b30;
+  --border: rgba(0, 0, 0, 0.06);
+  --input: rgba(0, 0, 0, 0.04);
+  --ring: #0071e3;
+  --chart-1: #0071e3;
+  --chart-2: #30b0c0;
+  --chart-3: #34c759;
+  --chart-4: #ff9500;
+  --chart-5: #ff3b30;
+  --sidebar: #fbfbfd;
+  --sidebar-foreground: #1d1d1f;
+  --sidebar-primary: #0071e3;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f5f5f7;
+  --sidebar-accent-foreground: #1d1d1f;
+  --sidebar-border: rgba(0, 0, 0, 0.05);
+  --sidebar-ring: #0071e3;
+
+  /* ── Premium macOS Light Glass ── */
+  --app-bg:            #fbfbfd;
+  --app-bg-gradient:   linear-gradient(135deg, #fbfbfd 0%, #f5f5f7 100%);
+  --surface:           rgba(255, 255, 255, 0.5);
+  --surface-glass:     rgba(255, 255, 255, 0.45);
+  --surface-hover:     rgba(245, 245, 247, 0.6);
+  --surface-card:      rgba(255, 255, 255, 0.48);
+  --border-c:          rgba(0, 0, 0, 0.05);
+  --border-glass:      rgba(0, 0, 0, 0.08);
+  --text-primary:      #1d1d1f;
+  --text-secondary:    #555555;
+  --text-muted:        #86868b;
+  --accent-color:      #0071e3;
+  --accent-hover:      #0051d5;
+  --accent-text:       #ffffff;
+  --accent-glow:       rgba(0, 113, 227, 0.15);
+  --accent-secondary:  #ff9500;
+  --sidebar-bg-c:      rgba(245, 245, 247, 0.8);
+  --logo-bg:           rgba(0, 113, 227, 0.1);
+  --logo-text:         #1d1d1f;
+  --search-bg:         rgba(255, 255, 255, 0.45);
+  --search-border:     rgba(0, 0, 0, 0.05);
+  --search-focus:      #0071e3;
+  --shortcut-bg:       rgba(255, 255, 255, 0.4);
+  --shortcut-hover-bg: rgba(245, 245, 247, 0.5);
+  --shortcut-hover-border: #0071e3;
+  --tag-bg:            rgba(0, 113, 227, 0.1);
+  --tag-text:          #0071e3;
+  --upgrade-bg:        rgba(0, 113, 227, 0.06);
+  --upgrade-text:      #0071e3;
+  --upgrade-border:    rgba(0, 113, 227, 0.12);
+  --upgrade-btn-bg:    rgba(0, 113, 227, 0.1);
+  --btn-icon-bg:       rgba(245, 245, 247, 0.4);
+  --btn-icon-hover:    rgba(235, 235, 240, 0.5);
+  --glass-effect:      blur(18px);
+}
+
+/* ================================================
+   🌆 ELEGANT EVENING (Deep Purple Glass)
+   Sophisticated purple with warm accents
+   ================================================ */
+[data-theme="evening"] {
+  --radius: 0.75rem;
+
+  /* Shadcn required vars */
+  --background: #0d0620;
+  --foreground: #f5f5f7;
+  --card: #14071b;
+  --card-foreground: #f5f5f7;
+  --popover: #14071b;
+  --popover-foreground: #f5f5f7;
+  --primary: #ff9500;
+  --primary-foreground: #0d0620;
+  --secondary: #1a0d2e;
+  --secondary-foreground: #f5f5f7;
+  --muted: #555;
+  --muted-foreground: #a1a1a6;
+  --accent: #1a0d2e;
+  --accent-foreground: #f5f5f7;
+  --destructive: #ff3b30;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.05);
+  --ring: #ff9500;
+  --chart-1: #ff9500;
+  --chart-2: #d946ef;
+  --chart-3: #34c759;
+  --chart-4: #30b0c0;
+  --chart-5: #ff3b30;
+  --sidebar: #0d0620;
+  --sidebar-foreground: #f5f5f7;
+  --sidebar-primary: #ff9500;
+  --sidebar-primary-foreground: #0d0620;
+  --sidebar-accent: #1a0d2e;
+  --sidebar-accent-foreground: #f5f5f7;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: #ff9500;
+
+  /* ── Premium Deep Purple Glass ── */
+  --app-bg:            #0d0620;
+  --app-bg-gradient:   linear-gradient(135deg, #0d0620 0%, #14071b 100%);
+  --surface:           rgba(26, 13, 46, 0.4);
+  --surface-glass:     rgba(26, 13, 46, 0.35);
+  --surface-hover:     rgba(35, 20, 55, 0.5);
+  --surface-card:      rgba(26, 13, 46, 0.38);
+  --border-c:          rgba(255, 255, 255, 0.06);
+  --border-glass:      rgba(255, 255, 255, 0.1);
+  --text-primary:      #f5f5f7;
+  --text-secondary:    #a1a1a6;
+  --text-muted:        #86868b;
+  --accent-color:      #ff9500;
+  --accent-hover:      #e68500;
+  --accent-text:       #ffffff;
+  --accent-glow:       rgba(255, 149, 0, 0.25);
+  --accent-secondary:  #d946ef;
+  --sidebar-bg-c:      rgba(13, 6, 32, 0.85);
+  --logo-bg:           rgba(255, 149, 0, 0.15);
+  --logo-text:         #f5f5f7;
+  --search-bg:         rgba(26, 13, 46, 0.35);
+  --search-border:     rgba(255, 255, 255, 0.06);
+  --search-focus:      #ff9500;
+  --shortcut-bg:       rgba(26, 13, 46, 0.35);
+  --shortcut-hover-bg: rgba(35, 20, 55, 0.45);
+  --shortcut-hover-border: #ff9500;
+  --tag-bg:            rgba(255, 149, 0, 0.12);
+  --tag-text:          #ffb84d;
+  --upgrade-bg:        rgba(255, 149, 0, 0.08);
+  --upgrade-text:      #ffb84d;
+  --upgrade-border:    rgba(255, 149, 0, 0.15);
+  --upgrade-btn-bg:    rgba(255, 149, 0, 0.12);
+  --btn-icon-bg:       rgba(26, 13, 46, 0.35);
+  --btn-icon-hover:    rgba(35, 20, 55, 0.45);
+  --glass-effect:      blur(20px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background-color: var(--app-bg);
+    color: var(--text-primary);
+    transition: background-color 0.4s ease, color 0.4s ease;
+  }
+}
+
+/* Premium smooth transitions */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 0.25s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Typography refinements */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+}
+
+p {
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* ================================================
+   Premium Glass Morphism Effects
+   ================================================ */
+.glass {
+  background: var(--surface-glass);
+  backdrop-filter: var(--glass-effect);
+  -webkit-backdrop-filter: var(--glass-effect);
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.glass-card {
+  background: var(--surface-card);
+  backdrop-filter: var(--glass-effect);
+  -webkit-backdrop-filter: var(--glass-effect);
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.glass-hover:hover {
+  background: var(--surface-hover);
+  border-color: var(--accent-color);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ================================================
+   Background Image Support
+   ================================================ */
+#app-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+  opacity: 0.7;
+  filter: brightness(0.8) blur(2px);
+}
+
+#app-background-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(10, 15, 26, 0.6) 0%, rgba(30, 12, 58, 0.5) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+@supports (-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px)) {
+  .glass, .glass-card {
+    background-color: var(--surface-glass);
+  }
+}
+
+/* Fallback for browsers without backdrop-filter */
+@supports not ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
+  .glass, .glass-card {
+    background-color: var(--surface);
+  }
+}
