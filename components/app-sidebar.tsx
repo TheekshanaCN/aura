@@ -94,50 +94,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         style={{ background: "var(--sidebar-bg-c)" }}
       >
         <NavMain items={data.navMain} />
-
-        {!isCollapsed && (
-          <div
-            className="mt-8 px-4 py-5 rounded-[2rem] mx-1"
-            style={{
-              background: "var(--upgrade-bg)",
-              border: "1px solid var(--upgrade-border)",
-            }}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <div
-                className="size-5 rounded-full flex items-center justify-center"
-                style={{ background: "var(--accent-color)" }}
-              >
-                <Plus
-                  className="size-3"
-                  style={{ color: "var(--accent-text)" }}
-                  strokeWidth={4}
-                />
-              </div>
-              <span
-                className="text-xs font-bold"
-                style={{ color: "var(--upgrade-text)" }}
-              >
-                Upgrade to Plus
-              </span>
-            </div>
-            <p
-              className="text-[10px] leading-relaxed mb-4 font-medium italic"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Empower your workflow with Aura Intelligence.
-            </p>
-            <button
-              className="w-full py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all"
-              style={{
-                background: "var(--upgrade-btn-bg)",
-                color: "var(--upgrade-text)",
-              }}
-            >
-              Upgrade
-            </button>
-          </div>
-        )}
       </SidebarContent>
 
       <SidebarFooter

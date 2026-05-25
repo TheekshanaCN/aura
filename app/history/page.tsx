@@ -1,139 +1,129 @@
 "use client"
 
+import { useState, useEffect, useMemo } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { NavUser } from "@/components/nav-user"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar"
-import { GalleryVerticalEnd, Bell, Briefcase, Flame, Gem, Clock, Trash2, Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { useState, useEffect } from "react"
-import { api, HistoryItem } from "@/lib/api"
+  GalleryVerticalEnd, Bell, Briefcase, Flame, Gem, Clock,
+  Trash2, Search, Target, MessageSquare, Zap, Settings2,
+  CheckCircle2, Filter, RefreshCw, XCircle,
+} from "lucide-react"
+import { CurrentGoalBadge } from "@/components/current-goal-badge"
+import { loadHistory, deleteHistoryEntry, clearHistory, HistoryEntry } from "@/lib/history"
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
+const data = { user: { name: "shadcn", email: "m@example.com", avatar: "/avatars/shadcn.jpg" } }
+
+type Category = HistoryEntry["category"] | "all"
+
+const categoryConfig: Record<HistoryEntry["category"], { label: string; color: string; Icon: React.ElementType }> = {
+  goal:     { label: "Goal",     color: "#22c55e", Icon: Target },
+  chat:     { label: "Chat",     color: "#3b82f6", Icon: MessageSquare },
+  activity: { label: "Activity", color: "#f59e0b", Icon: Zap },
+  system:   { label: "System",   color: "#8b5cf6", Icon: Settings2 },
+  checkin:  { label: "Check-in", color: "#6366f1", Icon: CheckCircle2 },
+}
+
+function formatRelative(isoStr: string): string {
+  const date = new Date(isoStr)
+  const diff = Date.now() - date.getTime()
+  const mins = Math.floor(diff / 60_000)
+  const hours = Math.floor(diff / 3_600_000)
+  const days = Math.floor(diff / 86_400_000)
+  if (mins < 1) return "Just now"
+  if (mins < 60) return `${mins}m ago`
+  if (hours < 24) return `${hours}h ago`
+  if (days < 7) return `${days}d ago`
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+}
+
+function groupByDate(items: HistoryEntry[]): { label: string; items: HistoryEntry[] }[] {
+  const groups: Record<string, HistoryEntry[]> = {}
+  const todayStr = new Date().toDateString()
+  const yestStr  = new Date(Date.now() - 86_400_000).toDateString()
+  for (const item of items) {
+    const d = new Date(item.timestamp).toDateString()
+    const label = d === todayStr ? "Today" : d === yestStr ? "Yesterday"
+      : new Date(item.timestamp).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })
+    if (!groups[label]) groups[label] = []
+    groups[label].push(item)
+  }
+  return Object.entries(groups).map(([label, items]) => ({ label, items }))
 }
 
 export default function HistoryPage() {
-  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [items, setItems] = useState<HistoryEntry[]>([])
+  const [query, setQuery] = useState("")
+  const [filter, setFilter] = useState<Category>("all")
+  const [confirmClear, setConfirmClear] = useState(false)
+
+  function reload() { setItems(loadHistory()) }
 
   useEffect(() => {
-    const loadHistory = async () => {
-      setIsLoading(true)
-      try {
-        const items = await api.history.getAll()
-        setHistoryItems(items)
-      } catch (error) {
-        console.error("Error loading history:", error)
-      } finally {
-        setIsLoading(false)
-      }
+    reload()
+    const onCustom = () => reload()
+    const onStorage = (e: StorageEvent) => { if (e.key === "aura_history") reload() }
+    window.addEventListener("aura_history_updated", onCustom)
+    window.addEventListener("storage", onStorage)
+    return () => {
+      window.removeEventListener("aura_history_updated", onCustom)
+      window.removeEventListener("storage", onStorage)
     }
-
-    loadHistory()
   }, [])
-  const getTypeColor = (category: string) => {
-    switch (category) {
-      case "goal":
-        return "#22c55e"
-      case "chat":
-        return "#3b82f6"
-      case "activity":
-        return "#f59e0b"
-      case "system":
-        return "#8b5cf6"
-      default:
-        return "var(--accent-color)"
+
+  function handleDelete(id: string) { deleteHistoryEntry(id); reload() }
+
+  function handleClearAll() {
+    if (confirmClear) { clearHistory(); reload(); setConfirmClear(false) }
+    else { setConfirmClear(true); setTimeout(() => setConfirmClear(false), 3000) }
+  }
+
+  const filtered = useMemo(() => {
+    let r = items
+    if (filter !== "all") r = r.filter(i => i.category === filter)
+    if (query.trim()) {
+      const q = query.toLowerCase()
+      r = r.filter(i => i.action.toLowerCase().includes(q) || i.description.toLowerCase().includes(q))
     }
-  }
+    return r
+  }, [items, filter, query])
 
-  const formatTime = (date: Date) => {
-    const now = new Date()
-    const diff = now.getTime() - date.getTime()
-    const minutes = Math.floor(diff / 60000)
-    const hours = Math.floor(diff / 3600000)
-    const days = Math.floor(diff / 86400000)
+  const groups = useMemo(() => groupByDate(filtered), [filtered])
 
-    if (minutes < 60) return `${minutes}m ago`
-    if (hours < 24) return `${hours}h ago`
-    if (days < 7) return `${days}d ago`
-    return date.toLocaleDateString()
-  }
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { all: items.length }
+    for (const cat of Object.keys(categoryConfig)) c[cat] = items.filter(i => i.category === cat).length
+    return c
+  }, [items])
 
   return (
     <SidebarProvider>
-      <div
-        className="flex flex-col w-full min-h-screen"
-        style={{ background: "var(--app-bg)", color: "var(--text-primary)" }}
-      >
-        {/* Global Sticky Header */}
-        <header
-          className="sticky top-0 z-50 flex h-16 w-full items-center justify-between px-4 glass"
-          style={{
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-          }}
-        >
+      <div className="flex flex-col w-full min-h-screen" style={{ background: "var(--app-bg)", color: "var(--text-primary)" }}>
+
+        <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between px-4 glass"
+          style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
           <div className="flex items-center gap-3">
-            <div
-              className="flex aspect-square size-8 items-center justify-center rounded-lg"
-              style={{ background: "var(--logo-bg)", color: "var(--logo-text)" }}
-            >
+            <div className="flex aspect-square size-8 items-center justify-center rounded-lg"
+              style={{ background: "var(--logo-bg)", color: "var(--logo-text)" }}>
               <GalleryVerticalEnd className="size-5" />
             </div>
-            <span
-              className="text-lg font-bold tracking-tight"
-              style={{ color: "var(--text-primary)" }}
-            >
-              aura
-            </span>
+            <span className="text-lg font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>aura</span>
           </div>
-
+          <div className="hidden md:flex items-center justify-center flex-1"><CurrentGoalBadge /></div>
           <div className="flex items-center gap-2 md:gap-4">
             <div className="hidden items-center gap-2 md:flex">
               {[Briefcase, Bell].map((Icon, i) => (
-                <button
-                  key={i}
-                  className="flex size-9 items-center justify-center rounded-xl transition-colors"
-                  style={{
-                    background: "var(--btn-icon-bg)",
-                    color: "var(--text-muted)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "var(--btn-icon-hover)"
-                    e.currentTarget.style.color = "var(--text-primary)"
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "var(--btn-icon-bg)"
-                    e.currentTarget.style.color = "var(--text-muted)"
-                  }}
-                >
+                <button key={i} className="flex size-9 items-center justify-center rounded-xl"
+                  style={{ background: "var(--btn-icon-bg)", color: "var(--text-muted)" }}>
                   <Icon className="size-5" />
                 </button>
               ))}
             </div>
-
-            <div
-              className="glass flex items-center gap-3 px-3 py-1.5 rounded-xl"
-              style={{
-                backdropFilter: "blur(10px)",
-                WebkitBackdropFilter: "blur(10px)",
-              }}
-            >
-              <div className="flex items-center gap-1.5">
-                <Flame className="size-4 fill-orange-500 text-orange-500" />
-                <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>91</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Gem className="size-4 fill-yellow-500 text-yellow-500" />
-                <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>1K</span>
-              </div>
+            <div className="glass flex items-center gap-3 px-3 py-1.5 rounded-xl">
+              <div className="flex items-center gap-1.5"><Flame className="size-4 fill-orange-500 text-orange-500" />
+                <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>91</span></div>
+              <div className="flex items-center gap-1.5"><Gem className="size-4 fill-yellow-500 text-yellow-500" />
+                <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>1K</span></div>
             </div>
             <NavUser user={data.user} />
           </div>
@@ -142,109 +132,126 @@ export default function HistoryPage() {
         <div className="flex flex-1 overflow-hidden">
           <AppSidebar />
           <SidebarInset style={{ background: "var(--app-bg)" }}>
-            <div className="flex flex-1 flex-col gap-6 p-6 lg:p-10 overflow-auto">
-              {/* Page Header */}
-              <div>
-                <h1
-                  className="text-4xl font-bold tracking-tight mb-2"
-                  style={{ color: "var(--text-primary)" }}
-                >
-                  History
-                </h1>
-                <p style={{ color: "var(--text-muted)" }}>
-                  View all your recent activities and actions
-                </p>
+            <div className="flex flex-col gap-6 p-6 lg:p-8 overflow-auto min-h-full">
+
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <h1 className="text-2xl font-extrabold" style={{ color: "var(--text-primary)" }}>History</h1>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{items.length} events logged</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={reload} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold"
+                    style={{ background: "var(--surface)", color: "var(--text-muted)", border: "1px solid var(--border-c)" }}>
+                    <RefreshCw className="size-3.5" />Refresh
+                  </button>
+                  {items.length > 0 && (
+                    <button onClick={handleClearAll}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all"
+                      style={{ background: confirmClear ? "rgba(239,68,68,0.12)" : "var(--surface)", color: confirmClear ? "#ef4444" : "var(--text-muted)", border: `1px solid ${confirmClear ? "rgba(239,68,68,0.3)" : "var(--border-c)"}` }}>
+                      <Trash2 className="size-3.5" />{confirmClear ? "Confirm clear all" : "Clear all"}
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* Search Bar */}
-              <div className="relative max-w-2xl">
-                <Search
-                  className="absolute left-4 top-1/2 -translate-y-1/2 size-5"
-                  style={{ color: "var(--text-subtle)" }}
-                />
-                <Input
-                  placeholder="Search history..."
-                  className="h-12 pl-12 pr-4 rounded-xl focus:ring-0"
-                  style={{
-                    background: "var(--search-bg)",
-                    border: "1px solid var(--search-border)",
-                    color: "var(--text-primary)",
-                  }}
-                />
+              <div className="relative max-w-xl">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4" style={{ color: "var(--text-muted)" }} />
+                <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search history…"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-xl text-sm outline-none"
+                  style={{ background: "var(--surface)", border: "1px solid var(--border-c)", color: "var(--text-primary)" }} />
+                {query && (
+                  <button onClick={() => setQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }}>
+                    <XCircle className="size-4" />
+                  </button>
+                )}
               </div>
 
-              {/* History List */}
-              <div className="space-y-3 max-w-2xl">
-                {historyItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="glass-card p-4 rounded-xl flex items-start justify-between gap-4 group"
-                    style={{
-                      background: "var(--surface-card)",
-                      border: "1px solid var(--border-glass)",
-                      backdropFilter: "blur(10px)",
-                      WebkitBackdropFilter: "blur(10px)",
-                    }}
-                  >
-                    <div className="flex items-start gap-4 flex-1 min-w-0">
-                      {/* Type Icon */}
-                      <div
-                        className="flex items-center justify-center size-10 rounded-lg flex-shrink-0 mt-0.5"
-                        style={{ background: `${getTypeColor(item.category)}20`, color: getTypeColor(item.category) }}
-                      >
-                        <Clock className="size-5" />
-                      </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Filter className="size-3.5 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+                {(["all", ...Object.keys(categoryConfig)] as Category[]).map(cat => {
+                  const cfg = cat !== "all" ? categoryConfig[cat as HistoryEntry["category"]] : null
+                  const active = filter === cat
+                  return (
+                    <button key={cat} onClick={() => setFilter(cat)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
+                      style={{
+                        background: active ? (cfg ? `${cfg.color}18` : "var(--accent-color)") : "var(--surface)",
+                        color: active ? (cfg ? cfg.color : "var(--accent-text)") : "var(--text-muted)",
+                        border: `1px solid ${active ? (cfg ? `${cfg.color}35` : "transparent") : "var(--border-c)"}`,
+                      }}>
+                      {cfg && <cfg.Icon className="size-3" />}
+                      {cat === "all" ? "All" : cfg!.label}
+                      <span className="opacity-60">({counts[cat] ?? 0})</span>
+                    </button>
+                  )
+                })}
+              </div>
 
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <span
-                            className="text-sm font-semibold"
-                            style={{ color: "var(--text-primary)" }}
-                          >
-                            {item.action}
-                          </span>
-                          <span
-                            className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                            style={{
-                              background: `${getTypeColor(item.category)}15`,
-                              color: getTypeColor(item.category),
-                            }}
-                          >
-                            {item.category}
-                          </span>
-                        </div>
-                        <p
-                          className="text-xs line-clamp-1"
-                          style={{ color: "var(--text-muted)" }}
-                        >
-                          {item.description}
-                        </p>
-                      </div>
-                    </div>
+              {items.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-20 gap-4">
+                  <div className="size-16 rounded-3xl flex items-center justify-center" style={{ background: "rgba(99,102,241,0.1)" }}>
+                    <Clock className="size-8" style={{ color: "var(--accent-color)" }} />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-base font-bold" style={{ color: "var(--text-primary)" }}>No history yet</p>
+                    <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
+                      Create a goal, do a check-in, or change a status — it will appear here.
+                    </p>
+                  </div>
+                </div>
+              )}
 
-                    {/* Time and Delete */}
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      <p
-                        className="text-xs whitespace-nowrap"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        {formatTime(item.timestamp)}
-                      </p>
-                      <button
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg"
-                        style={{
-                          background: "var(--surface-hover)",
-                          color: "var(--text-muted)",
-                        }}
-                        title="Remove from history"
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
+              {items.length > 0 && filtered.length === 0 && (
+                <div className="text-center py-10 text-sm" style={{ color: "var(--text-muted)" }}>
+                  No results for &ldquo;{query}&rdquo;
+                </div>
+              )}
+
+              <div className="flex flex-col gap-6 max-w-2xl">
+                {groups.map(({ label, items: groupItems }) => (
+                  <div key={label} className="flex flex-col gap-2">
+                    <p className="text-[11px] font-bold uppercase tracking-widest px-1" style={{ color: "var(--text-muted)" }}>
+                      {label}
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      {groupItems.map(item => {
+                        const cfg = categoryConfig[item.category] ?? categoryConfig.system
+                        return (
+                          <div key={item.id}
+                            className="flex items-start gap-3 p-4 rounded-2xl group transition-all"
+                            style={{ background: "var(--surface-card)", border: "1px solid var(--border-glass)" }}
+                            onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--accent-color)" }}
+                            onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border-glass)" }}>
+                            <div className="size-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                              style={{ background: `${cfg.color}15`, color: cfg.color }}>
+                              <cfg.Icon className="size-4" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                                <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{item.action}</span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                  style={{ background: `${cfg.color}15`, color: cfg.color }}>{cfg.label}</span>
+                              </div>
+                              <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>{item.description}</p>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <span className="text-[11px] whitespace-nowrap" style={{ color: "var(--text-muted)" }}>
+                                {formatRelative(item.timestamp)}
+                              </span>
+                              <button onClick={() => handleDelete(item.id)}
+                                className="size-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444" }}>
+                                <Trash2 className="size-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 ))}
               </div>
+
             </div>
           </SidebarInset>
         </div>

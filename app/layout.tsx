@@ -21,7 +21,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <ThemeProvider>
           <WallpaperProvider />
           {children}
-          <AskAura />
+          {/* <AskAura /> */}
           <GoalsReminderProvider />
         </ThemeProvider>
       </body>
