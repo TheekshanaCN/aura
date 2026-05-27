@@ -1,17 +1,13 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { AppSidebar } from "@/components/app-sidebar"
-import { NavUser } from "@/components/nav-user"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import {
-  GalleryVerticalEnd, Flame, Gem, Plus, Bell, Briefcase, Target,
+  Plus, Bell, Target,
   Kanban, List, Calendar, Clock, CheckCircle2, Circle, Loader2,
   XCircle, ChevronRight, Flag, TrendingUp, BarChart3, X,
   PlayCircle, StopCircle, AlarmClock, Repeat, Hash, ToggleLeft,
   ChevronDown, Pencil, Trash2, GitCommitHorizontal,
 } from "lucide-react"
-import { CurrentGoalBadge } from "@/components/current-goal-badge"
 import { logHistory } from "@/lib/history"
 
 type Status = "todo"|"processing"|"done"|"cancelled"
@@ -28,6 +24,11 @@ interface GoalUI {
   startChecked: boolean; endChecked: boolean; endCheckedAt?: string
 }
 interface CheckInState { visible: boolean; goalId: number|null; type: CheckInType }
+interface GoalFormState {
+  title: string; description: string; category: string; priority: GoalUI["priority"]
+  dueDate: string; startTime: string; endTime: string; goalType: GoalType
+  targetValue: string; targetUnit: string; repeat: RepeatType; reminderBefore: string
+}
 
 const STORAGE_KEY = "aura_goals"
 const TRIGGERED_KEY = "aura_goals_triggered"
@@ -87,8 +88,8 @@ function GoalFormModal({ open, onClose, onSave, editGoal }: {
 }) {
   const isEdit = !!editGoal
   const [step, setStep] = useState(1)
-  const blank = {
-    title: "", description: "", category: "Career", priority: "medium" as const,
+  const blank: GoalFormState = {
+    title: "", description: "", category: "Career", priority: "medium",
     dueDate: today, startTime: "09:00", endTime: "10:00", goalType: "binary" as GoalType,
     targetValue: "", targetUnit: "", repeat: "none" as RepeatType, reminderBefore: "10",
   }
@@ -707,8 +708,6 @@ function GoalsSummary({ goals }: { goals: GoalUI[] }) {
 }
 
 /* ── MAIN PAGE ── */
-const data = { user: { name: "shadcn", email: "m@example.com", avatar: "/avatars/shadcn.jpg" } }
-
 export default function GoalsPage() {
   const [goals, setGoals] = useState<GoalUI[]>([])
   const [view, setView] = useState<"kanban" | "list">("kanban")
@@ -798,43 +797,8 @@ export default function GoalsPage() {
   const filtered = filterStatus === "all" ? dateFiltered : dateFiltered.filter(g => g.status === filterStatus)
 
   return (
-    <SidebarProvider>
-      <div className="flex flex-col w-full min-h-screen" style={{ background: "var(--app-bg)", color: "var(--text-primary)" }}>
-        <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between px-4 shadow-sm glass"
-          style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
-          <div className="flex items-center gap-3">
-            <div className="flex aspect-square size-8 items-center justify-center rounded-lg"
-              style={{ background: "var(--logo-bg)", color: "var(--logo-text)" }}>
-              <GalleryVerticalEnd className="size-5" />
-            </div>
-            <span className="text-lg font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>aura</span>
-          </div>
-          <div className="hidden md:flex items-center justify-center flex-1"><CurrentGoalBadge /></div>
-          <div className="flex items-center gap-2 md:gap-4">
-            <div className="hidden items-center gap-2 md:flex">
-              {[Briefcase, Bell].map((Icon, i) => (
-                <button key={i} className="flex size-9 items-center justify-center rounded-xl transition-colors"
-                  style={{ background: "var(--btn-icon-bg)", color: "var(--text-muted)" }}
-                  onMouseEnter={e => { e.currentTarget.style.background = "var(--btn-icon-hover)"; e.currentTarget.style.color = "var(--text-primary)" }}
-                  onMouseLeave={e => { e.currentTarget.style.background = "var(--btn-icon-bg)"; e.currentTarget.style.color = "var(--text-muted)" }}>
-                  <Icon className="size-5" />
-                </button>
-              ))}
-            </div>
-            <div className="glass flex items-center gap-3 px-3 py-1.5 rounded-xl">
-              <div className="flex items-center gap-1.5"><Flame className="size-4 fill-orange-500 text-orange-500" />
-                <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>91</span></div>
-              <div className="flex items-center gap-1.5"><Gem className="size-4 fill-yellow-500 text-yellow-500" />
-                <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>1K</span></div>
-            </div>
-            <NavUser user={data.user} />
-          </div>
-        </header>
-
-        <div className="flex flex-1 overflow-hidden">
-          <AppSidebar />
-          <SidebarInset style={{ background: "var(--app-bg)" }}>
-            <div className="flex flex-col gap-6 p-6 lg:p-8 overflow-auto min-h-full">
+    <>
+      <div className="flex flex-col gap-6 p-6 lg:p-8 overflow-auto min-h-full">
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -939,13 +903,10 @@ export default function GoalsPage() {
 
               {goals.length > 0 && <GoalsSummary goals={goals} />}
               {goals.length > 0 && <ContributionGrid goals={goals} />}
-            </div>
-          </SidebarInset>
-        </div>
       </div>
 
       <GoalFormModal open={formOpen} onClose={() => { setFormOpen(false); setEditingGoal(null) }} onSave={handleSaveGoal} editGoal={editingGoal} />
       <GoalCheckInModal modal={checkIn} goals={goals} onResponse={handleCheckInResponse} onDismiss={() => setCheckIn({ visible: false, goalId: null, type: "start" })} />
-    </SidebarProvider>
+    </>
   )
 }

@@ -1,21 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { AppSidebar } from "@/components/app-sidebar"
-import { NavUser } from "@/components/nav-user"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import {
-  GalleryVerticalEnd, Bell, Briefcase, Flame, Gem,
   Upload, Moon, Sun, Palette, User, Globe, Shield,
   BellRing, CheckCircle2, Trash2, Save, X, Loader2,
 } from "lucide-react"
 import { useTheme } from "next-themes"
-import { CurrentGoalBadge } from "@/components/current-goal-badge"
 import { loadSettings, saveSettings, AppSettings } from "@/lib/settings-store"
 import { clearHistory } from "@/lib/history"
 import { saveWallpaper, loadWallpaper, deleteWallpaper } from "@/lib/wallpaper-store"
-
-const data = { user: { name: "shadcn", email: "m@example.com", avatar: "/avatars/shadcn.jpg" } }
 
 const themes = [
   { id: "night",   name: "Midnight Glass", Icon: Moon,    color: "#6366f1", desc: "Dark indigo theme" },
@@ -153,42 +146,7 @@ export default function SettingsPage() {
   if (!mounted) return null
 
   return (
-    <SidebarProvider>
-      <div className="flex flex-col w-full min-h-screen" style={{ background: "var(--app-bg)", color: "var(--text-primary)" }}>
-
-        <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between px-4 glass"
-          style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
-          <div className="flex items-center gap-3">
-            <div className="flex aspect-square size-8 items-center justify-center rounded-lg"
-              style={{ background: "var(--logo-bg)", color: "var(--logo-text)" }}>
-              <GalleryVerticalEnd className="size-5" />
-            </div>
-            <span className="text-lg font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>aura</span>
-          </div>
-          <div className="hidden md:flex items-center justify-center flex-1"><CurrentGoalBadge /></div>
-          <div className="flex items-center gap-2 md:gap-4">
-            <div className="hidden items-center gap-2 md:flex">
-              {[Briefcase, Bell].map((Icon, i) => (
-                <button key={i} className="flex size-9 items-center justify-center rounded-xl"
-                  style={{ background: "var(--btn-icon-bg)", color: "var(--text-muted)" }}>
-                  <Icon className="size-5" />
-                </button>
-              ))}
-            </div>
-            <div className="glass flex items-center gap-3 px-3 py-1.5 rounded-xl">
-              <div className="flex items-center gap-1.5"><Flame className="size-4 fill-orange-500 text-orange-500" />
-                <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>91</span></div>
-              <div className="flex items-center gap-1.5"><Gem className="size-4 fill-yellow-500 text-yellow-500" />
-                <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>1K</span></div>
-            </div>
-            <NavUser user={data.user} />
-          </div>
-        </header>
-
-        <div className="flex flex-1 overflow-hidden">
-          <AppSidebar />
-          <SidebarInset style={{ background: "var(--app-bg)" }}>
-            <div className="flex flex-col gap-6 p-6 lg:p-8 overflow-auto min-h-full max-w-2xl">
+    <div className="flex flex-col gap-6 p-6 lg:p-8 overflow-auto min-h-full max-w-2xl">
 
               <div>
                 <h1 className="text-2xl font-extrabold" style={{ color: "var(--text-primary)" }}>Settings</h1>
@@ -362,10 +320,6 @@ export default function SettingsPage() {
                 </div>
               </SectionCard>
 
-            </div>
-          </SidebarInset>
-        </div>
-      </div>
-    </SidebarProvider>
+    </div>
   )
 }

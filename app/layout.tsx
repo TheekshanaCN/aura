@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { AskAura } from "@/components/ask-aura";
 import { WallpaperProvider } from "@/components/wallpaper-provider";
 import { GoalsReminderProvider } from "@/components/goals-reminder-provider";
+import { LayoutShell } from "@/components/layout-shell";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -20,7 +20,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider>
           <WallpaperProvider />
-          {children}
+          <LayoutShell>{children}</LayoutShell>
           {/* <AskAura /> */}
           <GoalsReminderProvider />
         </ThemeProvider>
